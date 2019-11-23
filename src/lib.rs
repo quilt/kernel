@@ -1,5 +1,8 @@
 #![cfg_attr(not(test), no_std)]
 
+mod process;
+mod transaction;
+
 use arrayref::array_ref;
 use oof::Oof;
 
@@ -13,7 +16,7 @@ mod native {
     }
 }
 
-// #[cfg(feature = "ewasm")]
+#[cfg(feature = "ewasm")]
 #[no_mangle]
 pub extern "C" fn main() {
     let input_size = unsafe { native::eth2_blockDataSize() as usize };
