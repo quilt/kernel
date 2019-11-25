@@ -44,12 +44,12 @@ mod test {
         let to = [0u8; 20];
         let data = [3u8; 123];
 
-        let mut raw_call = [0u8; 4 + 20 + 123];
-        raw_call[0..4].copy_from_slice(&length.to_le_bytes());
-        raw_call[4..24].copy_from_slice(&to);
-        raw_call[24..147].copy_from_slice(&data);
+        let mut raw_tx = [0u8; 4 + 20 + 123];
+        raw_tx[0..4].copy_from_slice(&length.to_le_bytes());
+        raw_tx[4..24].copy_from_slice(&to);
+        raw_tx[24..147].copy_from_slice(&data);
 
-        let tx = Transaction::from_ptr(raw_call.as_ptr());
+        let tx = Transaction::from_ptr(raw_tx.as_ptr());
 
         assert_eq!(tx.length(), length);
         assert_eq!(tx.to(), &to);
