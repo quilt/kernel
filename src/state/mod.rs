@@ -1,12 +1,15 @@
 #[cfg(test)]
 mod mock;
 
+mod oof;
+
+use crate::address::Address;
 use crate::error::Error;
 
-pub trait State<A, K, V> {
-    fn root(&mut self) -> Result<V, Error<A>>;
-    fn code(&self, address: &A) -> Result<&[u8], Error<A>>;
-    fn deploy(&mut self, address: A, code: &[u8]) -> Result<(), Error<A>>;
-    fn get(&self, address: &A, key: &K) -> Option<&V>;
-    fn set(&mut self, address: &A, key: K, value: V) -> Result<Option<V>, Error<A>>;
+pub trait State<K, V> {
+    fn root(&mut self) -> Result<&V, Error<Address>>;
+    fn code(&self, address: &Address) -> Result<&[u8], Error<Address>>;
+    fn deploy(&mut self, address: Address, code: &[u8]) -> Result<(), Error<Address>>;
+    fn get(&self, address: &Address, key: &K) -> Option<&V>;
+    fn set(&mut self, address: &Address, key: K, value: V) -> Result<Option<V>, Error<Address>>;
 }

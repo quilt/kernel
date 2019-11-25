@@ -6,4 +6,5 @@ edition = "2018"
 
 [dependencies]
 arrayref = "0.3.5"
+bonsai = { version = "0.2.0", default-features = false, features = ["u128"] }
 oof = { path = "../oof" }

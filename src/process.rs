@@ -1,14 +1,15 @@
-use crate::error::Error;
-use crate::host::{eth2_callModule, eth2_loadModule};
-use crate::state::State;
-use crate::transaction::Transaction;
+use crate::{
+    address::Address,
+    error::Error,
+    host::{eth2_callModule, eth2_loadModule},
+    state::State,
+    transaction::Transaction,
+};
 
-type A = [u8; 20];
-
-pub fn process_raw_transactions<'a, K, V, T: State<A, K, V>>(
+pub fn process_raw_transactions<'a, K, V, T: State<K, V>>(
     db: &mut T,
     mut transactions: &[u8],
-) -> Result<(), Error<A>> {
+) -> Result<(), Error<Address>> {
     while transactions.len() > 0 {
         let tx = Transaction::from_ptr(transactions.as_ptr());
         transactions = &transactions[tx.length() as usize..];

@@ -1,7 +1,6 @@
+use crate::address::Address;
 use arrayref::array_ref;
-use core::slice;
-
-pub type Address = [u8; 20];
+use core::{mem::size_of, slice};
 
 #[cfg_attr(test, derive(Clone, Debug, PartialEq))]
 pub struct Transaction {
@@ -22,15 +21,22 @@ impl Transaction {
     }
 
     pub fn to(&self) -> &Address {
-        array_ref![
-            unsafe { slice::from_raw_parts(self.ptr.offset(4), 20) },
-            0,
-            20
-        ]
+        unsafe {
+            core::mem::transmute::<&[u8; size_of::<Address>()], &Address>(array_ref![
+                slice::from_raw_parts(self.ptr.offset(4), size_of::<Address>()),
+                0,
+                size_of::<Address>()
+            ])
+        }
     }
 
     pub fn data(&self) -> &[u8] {
-        unsafe { slice::from_raw_parts(self.ptr.offset(24), self.length as usize - 20) }
+        unsafe {
+            slice::from_raw_parts(
+                self.ptr.offset(4 + size_of::<Address>() as isize),
+                self.length as usize - size_of::<Address>(),
+            )
+        }
     }
 }
 

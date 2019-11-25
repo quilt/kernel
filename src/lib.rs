@@ -1,5 +1,6 @@
 #![cfg_attr(not(test), no_std)]
 
+mod address;
 mod error;
 mod process;
 mod state;
@@ -66,16 +67,17 @@ pub extern "C" fn main() {
 /// +--------------+------------------+------------+
 ///     4 bytes         T bytes            P bytes
 pub fn process_data_blob(blob: &mut [u8], pre_state_root: &[u8; 32]) -> [u8; 32] {
-    let mem_offset = u32::from_le_bytes(*array_ref!(blob, 0, 4)) as usize;
-    let transactions = &blob[0..mem_offset];
+    let (mem_offset, blob) = blob.split_at_mut(4);
+    let mem_offset = u32::from_le_bytes(*array_ref!(mem_offset, 0, 4)) as usize;
+    let (transactions, blob) = blob.split_at_mut(mem_offset);
 
-    let mut mem = unsafe { Oof::from_blob(blob.as_mut_ptr().offset(mem_offset as isize), 4) };
+    let mut mem = unsafe { Oof::from_blob(blob.as_mut_ptr(), 4) };
 
     // Verify pre_state_root
     let pre_root = mem.root().unwrap();
     assert_eq!(pre_state_root, pre_root);
 
-    // process_raw_transactions(&mut mem, transactions);
+    process_raw_transactions(&mut mem, transactions).expect("to process all transactions");
 
     *mem.root().unwrap()
 }
