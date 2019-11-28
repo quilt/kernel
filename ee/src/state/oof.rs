@@ -19,7 +19,7 @@ impl<'a> State<K, V> for Oof<'a> {
         Oof::root(self).map_err(|e| e.into())
     }
 
-    fn code(&self, address: &Address) -> Result<&[u8], Error<Address>> {
+    fn code(&self, _: &Address) -> Result<&[u8], Error<Address>> {
         unimplemented!()
     }
 
