@@ -7,3 +7,6 @@ build = "build.rs"
 autobins = false
 
 [dependencies]
+
+[dev-dependencies]
+ewasm = "0.2.3"
