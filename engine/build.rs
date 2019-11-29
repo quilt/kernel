@@ -11,7 +11,7 @@ fn main() {
     let status = Command::new(env::var("CARGO").unwrap())
         .arg("build")
         .arg("--target=wasm32-unknown-unknown")
-        .arg("--manifest-path=../kernel/Cargo.toml")
+        .arg("--manifest-path=../core/Cargo.toml")
         .arg(format!("--target-dir={}", out_dir))
         .status()
         .expect("failed to execute rustc");

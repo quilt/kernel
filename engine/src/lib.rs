@@ -26,7 +26,7 @@ impl<'a, T: Contract> Kernel<'a, T> {
     pub fn asm(&self) -> Vec<u8> {
         let ret = include_bytes!(concat!(
             env!("OUT_DIR"),
-            "/wasm32-unknown-unknown/debug/kernel.wasm"
+            "/wasm32-unknown-unknown/debug/core.wasm"
         ));
         ret.to_vec()
     }
