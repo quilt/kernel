@@ -5,7 +5,6 @@ mod address;
 mod error;
 mod process;
 mod state;
-mod transaction;
 
 use arrayref::array_ref;
 use oof::Oof;

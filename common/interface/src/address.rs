@@ -5,6 +5,7 @@ pub const ADDRESS_SIZE: usize = 1;
 type T = [u8; ADDRESS_SIZE];
 
 #[derive(Clone, Copy, Debug)]
+#[cfg_attr(test, derive(PartialEq))]
 pub struct Address(T);
 
 impl Address {

@@ -1,10 +1,9 @@
-use interface::Address;
+use interface::{Address, Transaction};
 
 use crate::{
     error::Error,
     host::{eth2_callModule, eth2_loadModule},
     state::State,
-    transaction::Transaction,
 };
 
 pub fn process_raw_transactions<'a, K, V, T: State<K, V>>(
