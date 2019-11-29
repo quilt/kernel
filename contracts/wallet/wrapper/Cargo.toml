@@ -1,0 +1,13 @@
+[package]
+name = "wallet"
+version = "0.0.0"
+authors = ["Matt Garnett <matt.garnett@me.com>"]
+edition = "2018"
+build = "build.rs"
+autobins = false
+
+[dependencies]
+interface = { path = "../../../common/interface" }
+
+[dev-dependencies]
+ewasm = "0.2.3"

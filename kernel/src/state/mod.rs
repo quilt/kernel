@@ -3,8 +3,8 @@ mod mock;
 
 mod oof;
 
-use crate::address::Address;
 use crate::error::Error;
+use interface::Address;
 
 pub trait State<K, V> {
     fn root(&mut self) -> Result<&V, Error<Address>>;

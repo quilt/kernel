@@ -1,9 +1,12 @@
 use ewasm::{Execute, RootRuntime};
-use wallet::asm;
+use interface::Contract;
+use wallet::Wallet;
 
 #[test]
 fn test() {
-    let mut runtime = RootRuntime::new(&asm(), &[], [0u8; 32]);
+    let wallet = Wallet::new();
+
+    let mut runtime = RootRuntime::new(&wallet.asm(), &[], [0u8; 32]);
 
     runtime.set_logger(|b| {
         println!("{}", b);

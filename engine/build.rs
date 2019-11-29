@@ -8,10 +8,11 @@ fn main() {
     let binary_name = Path::new("main.rs");
     let input_path = Path::new(&manifest_dir).join("src").join(binary_name);
 
-    let status = Command::new(env::var("RUSTC").unwrap())
+    let status = Command::new(env::var("CARGO").unwrap())
+        .arg("build")
         .arg("--target=wasm32-unknown-unknown")
-        .arg(format!("--out-dir={}", out_dir))
-        .arg(format!("{}", input_path.to_string_lossy()))
+        .arg("--manifest-path=../kernel/Cargo.toml")
+        .arg(format!("--target-dir={}", out_dir))
         .status()
         .expect("failed to execute rustc");
 

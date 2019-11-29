@@ -1,6 +1,6 @@
-use crate::address::Address;
 use arrayref::array_ref;
 use core::{mem::size_of, slice};
+use interface::Address;
 
 #[cfg_attr(test, derive(Clone, Debug, PartialEq))]
 pub struct Transaction {

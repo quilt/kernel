@@ -1,5 +1,5 @@
 [package]
-name = "umbrella"
+name = "kernel"
 version = "0.1.0"
 authors = ["Matt Garnett <matt.garnett@me.com>"]
 edition = "2018"
@@ -7,4 +7,5 @@ edition = "2018"
 [dependencies]
 arrayref = "0.3.5"
 bonsai = { version = "0.2.0", default-features = false, features = ["u128"] }
-oof = { path = "../oof" }
+interface = { path = "../common/interface", features = ["wasm"]  }
+oof = { path = "../../oof" }

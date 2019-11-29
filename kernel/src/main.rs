@@ -1,4 +1,5 @@
 #![cfg_attr(not(test), no_std)]
+#![no_main]
 
 mod address;
 mod error;

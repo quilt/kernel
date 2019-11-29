@@ -1,5 +1,6 @@
+use interface::Address;
+
 use crate::{
-    address::Address,
     error::Error,
     host::{eth2_callModule, eth2_loadModule},
     state::State,
