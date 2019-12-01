@@ -1,64 +1,40 @@
-use crate::{address::ADDRESS_SIZE, Address};
-use arrayref::array_ref;
-use core::{mem::size_of, slice};
+use crate::Address;
+use std::mem::size_of;
 
-#[cfg_attr(test, derive(Clone, Debug, PartialEq))]
 pub struct Transaction {
-    ptr: *const u8,
-    length: u32,
+    to: Address,
+    data: Vec<u8>,
 }
 
 impl Transaction {
-    pub fn from_ptr(ptr: *const u8) -> Transaction {
-        let length =
-            u32::from_le_bytes(*array_ref![unsafe { slice::from_raw_parts(ptr, 4) }, 0, 4]);
-
-        Transaction { ptr, length }
+    pub fn new(to: Address, data: Vec<u8>) -> Self {
+        Self { to, data }
     }
 
-    pub fn length(&self) -> u32 {
-        self.length
+    pub fn len(&self) -> u32 {
+        (size_of::<Address>() + self.data.len()) as u32
     }
 
-    pub fn to(&self) -> &Address {
-        unsafe {
-            core::mem::transmute::<&[u8; ADDRESS_SIZE], &Address>(array_ref![
-                slice::from_raw_parts(self.ptr.offset(4), ADDRESS_SIZE),
-                0,
-                size_of::<Address>()
-            ])
-        }
-    }
-
-    pub fn data(&self) -> &[u8] {
-        unsafe {
-            slice::from_raw_parts(
-                self.ptr.offset(4 + ADDRESS_SIZE as isize),
-                self.length as usize - ADDRESS_SIZE,
-            )
-        }
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut ret = self.len().to_le_bytes().to_vec();
+        ret.extend(self.to.as_bytes().to_vec());
+        ret.extend(self.data.clone());
+        ret
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::RawTransaction;
 
     #[test]
-    fn new_call() {
-        let length = ADDRESS_SIZE as u32 + 123u32;
-        let to = [0u8; ADDRESS_SIZE];
-        let data = [3u8; 123];
+    fn to_bytes() {
+        let tx = Transaction::new(Address::one(), vec![2; 100]);
+        let bytes = tx.to_bytes();
+        let raw = RawTransaction::from_ptr(bytes.as_ptr());
 
-        let mut raw_tx = [0u8; 4 + ADDRESS_SIZE + 123];
-        raw_tx[0..4].copy_from_slice(&length.to_le_bytes());
-        raw_tx[4..(4 + ADDRESS_SIZE)].copy_from_slice(&to);
-        raw_tx[(4 + ADDRESS_SIZE)..(4 + ADDRESS_SIZE + 123)].copy_from_slice(&data);
-
-        let tx = Transaction::from_ptr(raw_tx.as_ptr());
-
-        assert_eq!(tx.length(), length);
-        assert_eq!(tx.to(), &Address::new(to));
-        assert_eq!(&tx.data()[..], &data[..]);
+        assert_eq!(&tx.to, raw.to());
+        assert_eq!(&tx.data[..], &raw.data()[..]);
     }
 }

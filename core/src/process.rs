@@ -1,4 +1,4 @@
-use interface::{Address, Transaction};
+use interface::{Address, RawTransaction};
 
 use crate::{
     error::Error,
@@ -11,7 +11,7 @@ pub fn process_raw_transactions<'a, K, V, T: State<K, V>>(
     mut transactions: &[u8],
 ) -> Result<(), Error<Address>> {
     while transactions.len() > 0 {
-        let tx = Transaction::from_ptr(transactions.as_ptr());
+        let tx = RawTransaction::from_ptr(transactions.as_ptr());
         transactions = &transactions[tx.length() as usize..];
 
         match db.code(tx.to()) {

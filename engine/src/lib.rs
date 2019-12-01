@@ -1,24 +1,15 @@
-use interface::{Address, Contract};
+use bonsai::subtree_index_to_general;
+use ewasm::{Execute, RootRuntime};
+use interface::{Address, Contract, Transaction};
+use oof::Oof;
+use std::collections::HashMap;
+use std::mem::size_of;
 
-struct DeployedContract<'a, T: Contract> {
-    contract: &'a T,
-    address: Option<Address>,
+pub struct Engine<T: Contract + Clone> {
+    contracts: Vec<T>,
 }
 
-impl<'a, T: Contract> DeployedContract<'a, T> {
-    pub fn new(contract: &'a T) -> Self {
-        Self {
-            contract,
-            address: None,
-        }
-    }
-}
-
-struct Engine<'a, T: Contract> {
-    contracts: Vec<DeployedContract<'a, T>>,
-}
-
-impl<'a, T: Contract> Engine<'a, T> {
+impl<T: Contract + Clone> Engine<T> {
     pub fn new() -> Self {
         Self { contracts: vec![] }
     }
@@ -31,11 +22,34 @@ impl<'a, T: Contract> Engine<'a, T> {
         ret.to_vec()
     }
 
-    pub fn deploy(&mut self, contract: &'a T) {
-        self.contracts.push(DeployedContract::new(contract));
+    pub fn deploy(&mut self, contract: &mut T) {
+        contract.set_address(Address::one());
+        self.contracts.push(contract.clone());
     }
 
-    pub fn execute(&self) {
-        unimplemented!()
+    pub fn execute(&self, transactions: Vec<Transaction>) {
+        let mut mem = HashMap::<u128, [u8; 32]>::new();
+        let first = 1 << (size_of::<Address>() * 8 - 1);
+
+        for c in self.contracts.iter() {
+            let storage = c.to_map();
+            storage
+                .iter()
+                .map(|(k, v)| (subtree_index_to_general(first, *k), v));
+            mem.extend(storage);
+        }
+
+        let tx_len: u32 = transactions.iter().map(|tx| tx.len()).sum::<u32>() + 4;
+        let keys: Vec<u8> = mem.keys().flat_map(|k| k.to_le_bytes().to_vec()).collect();
+        let values: Vec<u8> = mem.values().flat_map(|v| v.to_vec()).collect::<Vec<u8>>();
+        let transactions: Vec<u8> = transactions.iter().flat_map(|tx| tx.to_bytes()).collect();
+
+        let mut data = tx_len.to_le_bytes().to_vec();
+        data.extend(transactions);
+        data.extend(keys);
+        data.extend(values);
+
+        let mut runtime = RootRuntime::new(&self.asm(), &data, [0u8; 32]);
+        let post = runtime.execute();
     }
 }

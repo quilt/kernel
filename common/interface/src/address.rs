@@ -16,6 +16,14 @@ impl Address {
     pub fn zero() -> Self {
         Address([0u8; ADDRESS_SIZE])
     }
+
+    pub fn one() -> Self {
+        Address([1u8; ADDRESS_SIZE])
+    }
+
+    pub fn as_bytes(&self) -> T {
+        self.0
+    }
 }
 
 const FIRST_ADDRESS: u128 = 1 << ((ADDRESS_SIZE * 8) as u32);

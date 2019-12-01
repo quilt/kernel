@@ -36,7 +36,7 @@ pub(crate) mod host {
             argument_length: u32,
             ret: *const u32,
             ret_length: u32,
-        );
+        ) -> u32;
         pub fn eth2_argument(dest: *const u32, length: u32);
         pub fn eth2_return(src: *const u32, length: u32);
     }
