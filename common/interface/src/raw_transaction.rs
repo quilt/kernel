@@ -16,7 +16,7 @@ impl RawTransaction {
         Self { ptr, length }
     }
 
-    pub fn length(&self) -> u32 {
+    pub fn len(&self) -> u32 {
         self.length
     }
 
@@ -46,18 +46,18 @@ mod test {
 
     #[test]
     fn new_call() {
-        let length = ADDRESS_SIZE as u32 + 123u32;
+        let len = ADDRESS_SIZE as u32 + 123u32;
         let to = [0u8; ADDRESS_SIZE];
         let data = [3u8; 123];
 
         let mut raw_tx = [0u8; 4 + ADDRESS_SIZE + 123];
-        raw_tx[0..4].copy_from_slice(&length.to_le_bytes());
+        raw_tx[0..4].copy_from_slice(&len.to_le_bytes());
         raw_tx[4..(4 + ADDRESS_SIZE)].copy_from_slice(&to);
         raw_tx[(4 + ADDRESS_SIZE)..(4 + ADDRESS_SIZE + 123)].copy_from_slice(&data);
 
         let tx = RawTransaction::from_ptr(raw_tx.as_ptr());
 
-        assert_eq!(tx.length(), length);
+        assert_eq!(tx.len(), len);
         assert_eq!(tx.to(), &Address::new(to));
         assert_eq!(&tx.data()[..], &data[..]);
     }

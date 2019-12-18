@@ -5,8 +5,8 @@ authors = ["Matt Garnett <matt.garnett@me.com>"]
 edition = "2018"
 
 [dependencies]
-bonsai = { vesion = "0.2.0", default-features = false, features = ["u128"] }
-ewasm = "0.2.3"
+bonsai = { version = "0.2.0", default-features = false, features = ["u128"] }
+ewasm = { version = "0.2.3", features = ["extra-pages"] }
 interface = { path = "../common/interface" }
 oof = "0.0.2"
 

@@ -3,6 +3,7 @@ use ewasm::{Execute, RootRuntime};
 use interface::{Contract, Transaction};
 use wallet::Wallet;
 
+#[ignore]
 #[test]
 fn test() {
     let wallet = Wallet::new();
@@ -22,5 +23,6 @@ fn engine() {
 
     engine.deploy(&mut wallet);
     let tx = Transaction::new(wallet.address().unwrap(), vec![]);
+
     engine.execute(vec![tx]);
 }

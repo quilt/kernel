@@ -40,16 +40,24 @@ impl<T: Contract + Clone> Engine<T> {
         }
 
         let tx_len: u32 = transactions.iter().map(|tx| tx.len()).sum::<u32>() + 4;
-        let keys: Vec<u8> = mem.keys().flat_map(|k| k.to_le_bytes().to_vec()).collect();
-        let values: Vec<u8> = mem.values().flat_map(|v| v.to_vec()).collect::<Vec<u8>>();
+        let proof_len: u32 = mem.len() as u32;
+        let mut keys: Vec<u128> = mem.keys().cloned().collect();
+        keys.sort();
+        let values: Vec<[u8; 32]> = keys.iter().map(|k| *mem.get(&k).unwrap()).collect();
+        let keys: Vec<u8> = keys.iter().flat_map(|k| k.to_le_bytes().to_vec()).collect();
+        let values: Vec<u8> = values.iter().flat_map(|v| v.to_vec()).collect();
         let transactions: Vec<u8> = transactions.iter().flat_map(|tx| tx.to_bytes()).collect();
 
         let mut data = tx_len.to_le_bytes().to_vec();
+
         data.extend(transactions);
+        data.extend(&proof_len.to_le_bytes());
         data.extend(keys);
         data.extend(values);
 
         let mut runtime = RootRuntime::new(&self.asm(), &data, [0u8; 32]);
+        runtime.set_logger(|s| println!("{}", s));
         let post = runtime.execute();
+        println!("post {:?}", post);
     }
 }

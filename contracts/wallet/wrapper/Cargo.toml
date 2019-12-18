@@ -8,7 +8,8 @@ autobins = false
 
 [dependencies]
 bonsai = { version = "0.2.0", default-features = false, features = ["u128"] }
-interface = { path = "../../../common/interface" }
+interface = { path = "../../../common/interface", features = [] }
+oof = { path = "../../../../oof" }
 
 [dev-dependencies]
 arrayref = "0.3.5"
