@@ -45,6 +45,6 @@ impl From<Address> for u128 {
     fn from(a: Address) -> Self {
         let mut buf = [0u8; 16];
         buf[0..ADDRESS_SIZE].copy_from_slice(&a.0);
-        FIRST_ADDRESS + u128::from_le_bytes(buf)
+        u128::from_le_bytes(buf)
     }
 }

@@ -17,7 +17,8 @@ impl RawTransaction {
     }
 
     pub fn len(&self) -> u32 {
-        self.length
+        // add 4 to account for the length field
+        self.length + 4
     }
 
     pub fn to(&self) -> &Address {

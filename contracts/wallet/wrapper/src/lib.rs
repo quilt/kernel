@@ -62,14 +62,6 @@ impl Contract for Wallet {
 
         map
     }
-
-    fn address(&self) -> Option<Address> {
-        self.address
-    }
-
-    fn set_address(&mut self, address: Address) {
-        self.address = Some(address);
-    }
 }
 
 fn u32_to_value(n: u32) -> [u8; 32] {
@@ -82,6 +74,7 @@ fn u32_to_value(n: u32) -> [u8; 32] {
 mod test {
     use super::*;
     use arrayref::array_ref;
+    use oof::Oof;
 
     fn build_value(n: &u32) -> Vec<u8> {
         u32_to_value(*n).to_vec()
@@ -115,6 +108,9 @@ mod test {
         }
 
         map.insert(31, [0u8; 32]);
+
+        let mut oof = Oof::from_map(map.clone(), 0);
+        let _ = oof.root().expect("should fucking work");
 
         assert_eq!(wallet.to_map(), map);
     }
