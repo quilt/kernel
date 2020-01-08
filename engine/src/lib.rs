@@ -31,7 +31,7 @@ impl<T: Contract> Engine<T> {
 
     pub fn deploy(&mut self, contract: T) -> Address {
         // TODO: generate random address to deploy to, or accept address as paramater
-        let address = Address::one();
+        let address = Address::zero();
         self.contracts.push((address, contract));
         address
     }

@@ -1,4 +1,5 @@
 mod oof;
+pub use crate::state::oof::Oof;
 
 use crate::error::Error;
 use alloc::vec::Vec;

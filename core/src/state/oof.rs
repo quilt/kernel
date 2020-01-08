@@ -4,7 +4,6 @@ use arrayref::array_ref;
 use bonsai::{first_leaf, log2, next_power_of_two, subtree_index_to_general};
 use core::convert::TryFrom;
 use interface::Address;
-use oof::Oof;
 
 type K = u128;
 type V = [u8; 32];
@@ -12,41 +11,55 @@ type V = [u8; 32];
 const CODE_ROOT_INDEX: u128 = 6;
 const CODE_LEN_INDEX: u128 = 7;
 
-impl State<K, V> for Oof {
-    fn root(&mut self) -> Result<&V, Error<Address>> {
-        Oof::root(self).map_err(|e| e.into())
+pub struct Oof {
+    mem: oof::Oof,
+    height: u32,
+}
+
+impl Oof {
+    pub fn from_raw(data: *mut u8, height: u32) -> Self {
+        Self {
+            mem: unsafe { oof::Oof::from_raw(data) },
+            height,
+        }
     }
 
-    fn code(&self, address: &Address) -> Result<Vec<u8>, Error<Address>> {
-        let root: u128 = address.clone().into();
+    pub fn address_root(&self, address: Address) -> u128 {
+        first_leaf(1, self.height as u128) + u128::from(address)
+    }
 
-        // this is a hack :-)
-        let root = root + 4;
+    pub fn get_bytes(&self, root: u128, len: u128) -> Result<Vec<u8>, Error<Address>> {
+        let mut bytes = Vec::with_capacity(len as usize);
+        let chunks: u128 = len / 32 + if len % 32 == 0 { 0 } else { 1 };
+        let first_chunk = &first_leaf(root, log2(next_power_of_two(chunks)));
 
-        let index = subtree_index_to_general(root, CODE_LEN_INDEX);
-        let raw_mixin = Oof::get(self, &index).ok_or(Error::MissingNode(index))?;
-
-        let len = u128::from_le_bytes(*array_ref![raw_mixin, 0, 16]);
-        let chunks = len / 32 + if len % 32 == 0 { 0 } else { 1 };
-
-        let first_chunk = &first_leaf(
-            subtree_index_to_general(root, CODE_ROOT_INDEX),
-            log2(next_power_of_two(chunks)),
-        );
-
-        let mut code = Vec::with_capacity(len as usize);
         for i in 0..chunks {
             let index = first_chunk + i;
-            let value = Oof::get(self, &index).ok_or(Error::MissingNode(index))?;
+            let value = self.mem.get(&index).ok_or(Error::MissingNode(index))?;
 
             if i == chunks - 1 && len % 32 != 0 {
-                code.extend(&value[0..(len % 32) as usize]);
+                bytes.extend(&value[0..(len % 32) as usize]);
             } else {
-                code.extend(value);
+                bytes.extend(value);
             }
         }
 
-        Ok(code)
+        Ok(bytes)
+    }
+}
+
+impl State<K, V> for Oof {
+    fn root(&mut self) -> Result<&V, Error<Address>> {
+        self.mem.root().map_err(|e| e.into())
+    }
+
+    fn code(&self, address: &Address) -> Result<Vec<u8>, Error<Address>> {
+        let root = self.address_root(*address);
+        let index = subtree_index_to_general(root, CODE_LEN_INDEX);
+        let raw_mixin = self.mem.get(&index).ok_or(Error::MissingNode(index))?;
+        let len = u128::from_le_bytes(*array_ref![raw_mixin, 0, 16]);
+
+        self.get_bytes(subtree_index_to_general(root, CODE_ROOT_INDEX), len)
     }
 
     fn deploy(&mut self, address: Address, code: &[u8]) -> Result<(), Error<Address>> {
@@ -55,12 +68,12 @@ impl State<K, V> for Oof {
 
     fn get(&self, address: &Address, key: &K) -> Option<&V> {
         let key = subtree_index_to_general((*address).into(), *key);
-        Oof::get(self, &key)
+        self.mem.get(&key)
     }
 
     fn set(&mut self, address: &Address, key: K, value: V) -> Result<Option<V>, Error<Address>> {
         let key = subtree_index_to_general((*address).into(), key);
-        Ok(Oof::set(self, key, value))
+        Ok(self.mem.set(key, value))
     }
 }
 
@@ -80,65 +93,6 @@ mod test {
     use std::collections::BTreeMap;
     use std::mem::size_of;
     use wallet::Wallet;
-
-    fn build_value(n: u8) -> [u8; 32] {
-        let mut tmp = [0; 32];
-        tmp[0] = n;
-        tmp
-    }
-
-    #[test]
-    fn code() {
-        // let mut keys: Vec<u128> = vec![
-        //     subtree_index_to_general(256, 2),
-        //     subtree_index_to_general(256, 7),
-        //     subtree_index_to_general(256, 12),
-        //     subtree_index_to_general(256, 13),
-        // ];
-
-        // let mut values = vec![
-        //     build_value(2),
-        //     build_value(64),
-        //     build_value(12),
-        //     build_value(13),
-        // ];
-
-        // let oof = Oof::new(&mut keys, &mut values);
-        // assert_eq!(
-        //     oof.code(&Address::zero()).unwrap(),
-        //     [build_value(12), build_value(13)]
-        //         .iter()
-        //         .flatten()
-        //         .cloned()
-        //         .collect::<Vec<u8>>()
-        //         .as_slice()
-        // );
-    }
-
-    // #[test]
-    // fn test() {
-    //     let mut mem = BTreeMap::<u128, [u8; 32]>::new();
-    //     let first = 1 << (size_of::<Address>() * 8);
-
-    //     let mut wallet = Wallet::new();
-    //     let contracts = vec![wallet.clone()];
-
-    //     for c in contracts.iter() {
-    //         let mut storage = c.to_map();
-    //         let storage: BTreeMap<u128, [u8; 32]> = storage
-    //             .into_iter()
-    //             .map(|(k, v)| {
-    //                 let new = subtree_index_to_general(first, k);
-    //                 (new, v)
-    //             })
-    //             .collect();
-
-    //         mem.extend(storage);
-    //     }
-
-    //     let oof = Oof::from_map(mem);
-    //     assert_eq!(oof.code(&Address::zero()), Ok(wallet.asm().to_vec()));
-    // }
 
     #[test]
     fn real() {
@@ -161,7 +115,7 @@ mod test {
             0,
         ];
 
-        let mut oof = unsafe { Oof::from_raw(blob.as_mut_ptr()) };
+        let mut oof = unsafe { Oof::from_raw(blob.as_mut_ptr(), 2) };
         println!("{:?}", oof.map.keys());
         oof.root().unwrap();
         println!("{:?}", oof.code(&Address::one()));
