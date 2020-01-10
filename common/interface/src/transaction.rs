@@ -36,5 +36,6 @@ mod test {
 
         assert_eq!(&tx.to, raw.to());
         assert_eq!(&tx.data[..], &raw.data()[..]);
+        assert_eq!(tx.len(), raw.len());
     }
 }

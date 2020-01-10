@@ -4,8 +4,7 @@ use core::convert::{From, TryFrom};
 pub const ADDRESS_SIZE: usize = 1;
 type T = [u8; ADDRESS_SIZE];
 
-#[derive(Clone, Copy, Debug)]
-#[cfg_attr(test, derive(PartialEq))]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Address(T);
 
 impl Address {
@@ -45,7 +44,7 @@ impl TryFrom<u128> for Address {
 impl From<Address> for u128 {
     fn from(a: Address) -> Self {
         let mut buf = [0u8; 16];
-        buf.copy_from_slice(&a.0);
-        FIRST_ADDRESS + u128::from_le_bytes(buf)
+        buf[0..ADDRESS_SIZE].copy_from_slice(&a.0);
+        u128::from_le_bytes(buf)
     }
 }

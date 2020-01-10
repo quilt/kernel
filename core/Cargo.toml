@@ -9,3 +9,6 @@ arrayref = "0.3.5"
 bonsai = { version = "0.2.0", default-features = false, features = ["u128"] }
 interface = { path = "../common/interface", features = ["wasm"]  }
 oof = { path = "../../oof" }
+
+[dev-dependencies]
+wallet = { path = "../contracts/wallet/wrapper" }

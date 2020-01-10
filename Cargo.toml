@@ -4,6 +4,7 @@ members = [
     "engine",
     "common/interface",
     "contracts/wallet/wrapper",
+    "contracts/hello-world",
 ]
 
 exclude = [

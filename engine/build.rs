@@ -3,6 +3,8 @@ use std::path::Path;
 use std::process::Command;
 
 fn main() {
+    println!("cargo:rerun-if-changed=../core/none");
+
     let out_dir = env::var("OUT_DIR").unwrap();
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let binary_name = Path::new("main.rs");
